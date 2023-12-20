@@ -3,7 +3,6 @@ import CheckField from "./CheckField";
 import Graph from "./Graph";
 import axios from "axios";
 
-
 const Main: React.FC = () => {
   const [prefectures, setPreFectures] = useState<{
     message: null;
@@ -11,21 +10,32 @@ const Main: React.FC = () => {
       prefCode: number;
       prefName: string;
     }[];
-  } | null>(null);
+  } | null>({ message: null, result: [] });
   const [prefPopulation, setPrefPopulation] = useState<
     { prefName: string; data: { year: number; value: number }[] }[]
   >([]);
 
   useEffect(() => {
     // 都道府県一覧を取得する
-    axios
-      .get("https://opendata.resas-portal.go.jp/api/v1/prefectures", {
-        headers: { "X-API-KEY": process.env.REACT_APP_API_KEY },
-      })
-      .then((results) => {
-        setPreFectures(results.data);
-      })
-      .catch((error) => {});
+     const fetchData = async () => {
+      try {
+        const apiData = await fetch(
+          "https://opendata.resas-portal.go.jp/api/v1/prefectures",
+          {
+            headers: {
+              "X-API-KEY": process.env.NEXT_PUBLIC_REACT_APP_API_KEY || "", // APIキーがundefinedの場合には空文字列をセット
+            },
+          }
+        );
+
+        const data = await apiData.json();
+          console.log(data);
+        setPreFectures(data.result);
+      } catch (error) {
+        alert("error");
+      }
+    };
+    fetchData();
   }, []);
 
   // チェックボックスをクリックした際の処理
@@ -43,13 +53,11 @@ const Main: React.FC = () => {
         -1
       )
         return;
-
-      axios
+        axios
         .get(
-          "https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?prefCode=" +
-            String(prefCode),
+          `https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&prefCode=`,
           {
-            headers: { "X-API-KEY": process.env.REACT_APP_API_KEY },
+            headers: { "X-API-KEY": process.env.NEXT_PUBLIC_REACT_APP_API_KEY },
           }
         )
         .then((results) => {
@@ -74,6 +82,7 @@ const Main: React.FC = () => {
       setPrefPopulation(c_prefPopulation);
     }
   };
+  console.log(process.env.REACT_APP_API_KEY);
 
   return (
     <main>
