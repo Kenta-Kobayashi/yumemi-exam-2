@@ -1,0 +1,9 @@
+
+.checkcardlist {
+	  display: flex;
+	}
+
+.checkcard {
+	  padding: 4px;
+	  margin: 0.5rem;
+}
